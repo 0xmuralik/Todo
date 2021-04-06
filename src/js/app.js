@@ -5,7 +5,7 @@ App = {
   init: async ()=>{
     App.initWeb3();
     App.loadContract();
-   // App.loadList()
+    
   },
 
   initWeb3: async()=>{
@@ -23,18 +23,29 @@ App = {
   loadContract: async()=>{
     var json= await $.getJSON("Todo.json");
     var signer=App.web3Provider.getSigner();
-     App.todo = new ethers.Contract('0x5644217e49C47d58EaE104d5d2cd6B35A8E5E0d6', json.abi, signer);
-    //var ul=$(".myUL");
+     App.todo = new ethers.Contract('0x9b24e857AE55C339F837B42213Da4DeD4C9E3cb6', json.abi, signer);
+    App.loadList();
+    App.listenForEvents();
     
+  },
+  listenForEvents: async()=> {
+    App.todo.on("TaskCreated",()=>{
+      console.log("task created");
+      //window.location.reload();
+      App.loadList();
+    })
+    App.todo.on("TaskChecked",()=>{
+      console.log("task checked");
+      //window.location.reload();
+      App.loadList()
+    })
   },
   loadList: async()=>{
     var count= await App.todo.count();
     console.log(count.toNumber());
-    //todo.addTask("Test");
-    //todo.addTask("Test 1");
     for(var i=0;i<count;i++){
       var task= await App.todo.todoList(i);
-      console.log(task.id.toNumber());
+      console.log("id="+task.id.toNumber());
       console.log(task.task);
       console.log(task.owner);
       console.log(task.checked);
